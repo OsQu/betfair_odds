@@ -4,8 +4,10 @@ require 'betfair'
 require 'active_support/core_ext/numeric/time'
 
 application_id = ENV["APPLICATION_ID"] or raise("No APPLICATION_ID env given")
-user_name = ENV["USERNAME"] or raise("No USERNAME env given")
+user_name = ENV["USER_NAME"] or raise("No USER_NAME env given")
 password = ENV["PASSWORD"] or raise("No PASSWORD env given")
+
+set :bind, "0.0.0.0"
 
 get "/" do
   client = Betfair::Client.new("X-Application" => application_id)
@@ -44,9 +46,7 @@ get "/" do
       marketId: market["marketId"],
       event: market["event"]["name"],
       start: market["marketStartTime"],
-      odds: {
-        odds: odds["runners"].map {|runner| runner["lastPriceTraded"] }
-      }
+      odds: odds["runners"].map {|runner| runner["lastPriceTraded"] }
     }
   end.to_json
 end
