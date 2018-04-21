@@ -20,7 +20,8 @@ get "/" do
         from: Time.now.beginning_of_day.iso8601,
         to: 7.days.from_now.end_of_day.iso8601
       },
-      marketCountries: ["GB", "IRE"]
+      marketCountries: ["GB", "IRE"],
+      inPlayOnly: false
     },
     maxResults: 200,
     marketProjection: [
@@ -33,8 +34,8 @@ get "/" do
     ]
   })
 
-  books = client.
-    list_market_book(marketIds: markets.map { |m| m["marketId"] })
+  books = client
+    .list_market_book(marketIds: markets.map { |m| m["marketId"] })
     .each_with_object({}) do |market, memo|
       memo[market["marketId"]] = market
     end
@@ -46,7 +47,14 @@ get "/" do
       marketId: market["marketId"],
       event: market["event"]["name"],
       start: market["marketStartTime"],
-      odds: odds["runners"].map {|runner| runner["lastPriceTraded"] }
+      odds: odds["runners"].each_with_object({}) do |runner, memo|
+        body = {
+          name: market["runners"].find { |market_runner| market_runner["selectionId"] == runner["selectionId"] }["runnerName"],
+          odds: runner["lastPriceTraded"]
+        }
+
+        memo[runner["selectionId"]] = body
+      end
     }
   end.to_json
 end
