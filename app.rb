@@ -3,15 +3,20 @@ require 'pry'
 require 'betfair'
 require 'active_support/core_ext/numeric/time'
 
-application_id = ENV["APPLICATION_ID"] or raise("No APPLICATION_ID env given")
-user_name = ENV["USER_NAME"] or raise("No USER_NAME env given")
-password = ENV["PASSWORD"] or raise("No PASSWORD env given")
+APPLICATION_ID = ENV["APPLICATION_ID"] or raise("No APPLICATION_ID env given")
+USER_NAME = ENV["USER_NAME"] or raise("No USER_NAME env given")
+PASSWORD = ENV["PASSWORD"] or raise("No PASSWORD env given")
 
 set :bind, "0.0.0.0"
 
+def get_client
+  client = Betfair::Client.new("X-Application" => APPLICATION_ID)
+  client.interactive_login(USER_NAME, PASSWORD)
+  client
+end
+
 get "/" do
-  client = Betfair::Client.new("X-Application" => application_id)
-  client.interactive_login(user_name, password)
+  client = get_client
   markets = client.list_market_catalogue({
     filter: {
       eventTypeIds: ["6422"],
@@ -55,6 +60,24 @@ get "/" do
 
         memo[runner["selectionId"]] = body
       end
+    }
+  end.to_json
+end
+
+get "/winner" do
+  client = get_client
+  match_ids = Array(params[:market_ids].split(','))
+  matches = match_ids.map do |match_id|
+    client.list_market_book({
+      marketIds: Array(match_id)
+    }).first
+  end
+  matches.map do |match|
+    puts match
+    winner = match["runners"].find { |runner| runner["status"] == "WINNER" }
+    {
+      marketId: match["marketId"],
+      winner: winner ? winner["selectionId"] : nil
     }
   end.to_json
 end
