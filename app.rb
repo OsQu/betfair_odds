@@ -19,13 +19,12 @@ get "/" do
   client = get_client
   markets = client.list_market_catalogue({
     filter: {
-      eventTypeIds: ["6422"],
+      competitionIds: ["5614746"],
       marketTypeCodes: ["MATCH_ODDS"],
       marketStartTime: {
         from: Time.now.beginning_of_day.iso8601,
         to: 7.days.from_now.end_of_day.iso8601
       },
-      marketCountries: ["GB", "IRE"],
       inPlayOnly: false
     },
     maxResults: 200,
