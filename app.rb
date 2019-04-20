@@ -19,7 +19,7 @@ get "/" do
   client = get_client
   markets = client.list_market_catalogue({
     filter: {
-      competitionIds: ["5614746"],
+      competitionIds: ["4226359"],
       marketTypeCodes: ["MATCH_ODDS"],
       marketStartTime: {
         from: Time.now.beginning_of_day.iso8601,
