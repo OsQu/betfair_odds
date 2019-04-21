@@ -6,6 +6,7 @@ require 'active_support/core_ext/numeric/time'
 APPLICATION_ID = ENV["APPLICATION_ID"] or raise("No APPLICATION_ID env given")
 USER_NAME = ENV["USER_NAME"] or raise("No USER_NAME env given")
 PASSWORD = ENV["PASSWORD"] or raise("No PASSWORD env given")
+COMPETITION_ID = ENV["COMPETITION_ID"] or raise("No COMPETITION_ID env given")
 
 set :bind, "0.0.0.0"
 
@@ -19,7 +20,7 @@ get "/" do
   client = get_client
   markets = client.list_market_catalogue({
     filter: {
-      competitionIds: ["4226359"],
+      competitionIds: [COMPETITION_ID],
       marketTypeCodes: ["MATCH_ODDS"],
       marketStartTime: {
         from: Time.now.beginning_of_day.iso8601,
